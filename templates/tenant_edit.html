@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Edit Tenant</h2>
+<form method="post" class="row g-2">
+  <div class="col-md-4"><input name="name" class="form-control" value="{{ tenant.name }}" required></div>
+  <div class="col-md-3"><input name="flat" class="form-control" value="{{ tenant.flat }}" required></div>
+  <div class="col-md-3"><input name="rent_amount" class="form-control" value="{{ tenant.rent_amount }}" required></div>
+  <div class="col-md-2"><button class="btn btn-primary w-100">Save</button></div>
+</form>
+{% endblock %}

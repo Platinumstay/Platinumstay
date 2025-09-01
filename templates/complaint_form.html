@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Submit Complaint</h2>
+<form method="post">
+  <div class="mb-2"><input name="title" class="form-control" placeholder="Title" required></div>
+  <div class="mb-2"><textarea name="description" class="form-control" placeholder="Describe your issue" rows="4"></textarea></div>
+  <button class="btn btn-success">Submit</button>
+</form>
+{% endblock %}

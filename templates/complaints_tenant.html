@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>My Complaints</h2>
+  <a class="btn btn-primary" href="{{ url_for('tenant_add_complaint') }}">+ New Complaint</a>
+</div>
+<div class="card">
+  <div class="card-body">
+    <ul class="list-group">
+      {% for c in complaints %}
+        <li class="list-group-item">{{ c.title }} — {{ c.status }} — {{ c.created_at.strftime('%Y-%m-%d') }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

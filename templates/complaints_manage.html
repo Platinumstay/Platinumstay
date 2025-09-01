@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Manage Complaints</h2>
+  <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">Back</a>
+</div>
+<div class="card">
+  <div class="card-body">
+    <table class="table table-sm">
+      <thead><tr><th>ID</th><th>Tenant</th><th>Title</th><th>Status</th><th>Change</th></tr></thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr>
+          <td>{{ c.id }}</td>
+          <td>{{ c.tenant.name }}</td>
+          <td>{{ c.title }}</td>
+          <td>{{ c.status }}</td>
+          <td>
+            <form method="post" action="{{ url_for('complaint_update_status', complaint_id=c.id) }}" class="d-flex">
+              <select name="status" class="form-select form-select-sm me-2">
+                <option {% if c.status=='Open' %}selected{% endif %}>Open</option>
+                <option {% if c.status=='In Progress' %}selected{% endif %}>In Progress</option>
+                <option {% if c.status=='Resolved' %}selected{% endif %}>Resolved</option>
+              </select>
+              <button class="btn btn-sm btn-primary">Update</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

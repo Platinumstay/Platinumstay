@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Tenant Dashboard</h2>
+<div class="card mb-3">
+  <div class="card-body">
+    <h5>{{ tenant.name }} — {{ tenant.flat }}</h5>
+    <p>Monthly Rent: ₹{{ tenant.rent_amount }}</p>
+    <a class="btn btn-primary" href="{{ url_for('my_payments') }}">My Payments</a>
+    <a class="btn btn-secondary" href="{{ url_for('my_complaints') }}">My Complaints</a>
+  </div>
+</div>
+{% endblock %}

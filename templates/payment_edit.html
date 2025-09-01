@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Edit Payment</h2>
+<form method="post" class="row g-2">
+  <div class="col-md-3"><input name="amount" class="form-control" value="{{ payment.amount }}" required></div>
+  <div class="col-md-3"><input name="due_date" type="date" class="form-control" value="{{ payment.due_date }}"></div>
+  <div class="col-md-3"><input name="paid_date" type="date" class="form-control" value="{{ payment.paid_date }}"></div>
+  <div class="col-md-2"><input name="note" class="form-control" value="{{ payment.note }}"></div>
+  <div class="col-md-1"><button class="btn btn-primary w-100">Save</button></div>
+</form>
+{% endblock %}
