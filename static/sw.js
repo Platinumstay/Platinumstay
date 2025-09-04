@@ -1,37 +1,49 @@
-
-const CACHE = "platinumstay-v8";
-const ASSETS = [
-  "/", "/login",
-  "/static/css/site.css",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
-  "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+// /srv/platinumstay/sw.js
+const CACHE = "platinumstay-v10";
+const START_URL = "/login?source=pwa";
+const PRECACHE = [
+  START_URL,
+  "/static/css/main.css",
+  "/static/js/main.js",
+  "/static/icons/icon-192.png",
+  "/static/icons/icon-512.png",
+  "/static/manifest.json"
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE))
+  );
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => (k === CACHE ? null : caches.delete(k))))
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     )
   );
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
-  if (req.method !== "GET") return;
-  event.respondWith(
-    caches.match(req).then((res) =>
-      res ||
-      fetch(req).then((netRes) => {
-        if (netRes.ok && req.url.startsWith(self.location.origin)) {
-          const copy = netRes.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
-        }
-        return netRes;
-      }).catch(() => caches.match("/login"))
-    )
-  );
+  // Network-first for HTML, cache-first for others
+  if (req.headers.get("accept")?.includes("text/html")) {
+    event.respondWith(
+      fetch(req).then((res) => {
+        const clone = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, clone));
+        return res;
+      }).catch(() => caches.match(req, { ignoreSearch: true }) || caches.match(START_URL))
+    );
+  } else {
+    event.respondWith(
+      caches.match(req).then((hit) => hit || fetch(req).then((res) => {
+        const clone = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, clone));
+        return res;
+      }))
+    );
+  }
 });
