@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">Tenant Dashboard</h3>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h5>Pay Rent</h5>
+      <form id="payForm" method="post" action="{{ url_for('create_payment') }}">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="label">Month (YYYY-MM)</label>
+            <input class="form-control" name="period" placeholder="YYYY-MM">
+          </div>
+          <div class="col-md-4">
+            <label class="label">Amount (₹)</label>
+            <input class="form-control" name="amount" type="number" step="0.01" value="{{ tenant.rent_amount }}">
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <button class="btn btn-primary w-100" type="submit">Pay Now</button>
+          </div>
+        </div>
+      </form>
+      <div class="small small-muted mt-2">If Razorpay is not configured by your owner, the system records a manual payment for demo.</div>
+      <hr>
+      <h6>Payment History</h6>
+      <table class="table table-sm">
+        <thead><tr><th>Period</th><th>Status</th><th>Amount</th><th>Paid On</th></tr></thead>
+        <tbody>
+          {% for p in payments %}
+            <tr>
+              <td>{{ p.period or '-' }}</td>
+              <td><span class="badge {% if p.status=='paid' %}text-bg-success{% elif p.status=='pending' %}text-bg-warning{% else %}text-bg-danger{% endif %}">{{ p.status|upper }}</span></td>
+              <td>₹{{ '%.2f'|format(p.amount) }}</td>
+              <td>{{ p.paid_on.strftime('%Y-%m-%d %H:%M') if p.paid_on else '-' }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-secondary">No payments yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h5>Raise a Complaint</h5>
+      <form method="post" action="{{ url_for('complaint_new') }}">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="label">Category</label>
+            <select name="category" class="form-select">
+              {% for c in ['electrical','plumbing','paint','other'] %}
+                <option value="{{c}}">{{ c.title() }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-8">
+            <label class="label">Subject</label>
+            <input class="form-control" name="subject" placeholder="Short title" required>
+          </div>
+          <div class="col-12">
+            <label class="label">Details</label>
+            <textarea class="form-control" name="detail" rows="3" placeholder="Describe the issue" required></textarea>
+          </div>
+          <div class="col-12"><button class="btn btn-primary">Submit</button></div>
+        </div>
+      </form>
+      <hr>
+      <h6>Your Complaints</h6>
+      <ul class="list-group list-group-flush">
+        {% for c in complaints %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>[{{ c.status|upper }}]</strong> {{ c.category.title() }} — {{ c.subject }}
+              <span class="text-secondary">· {{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <div class="d-flex gap-2">
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('complaint_edit', cid=c.id) }}">Edit</a>
+              <form method="post" action="{{ url_for('complaint_delete', cid=c.id) }}" onsubmit="return confirm('Delete this complaint?');">
+                <button class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          </li>
+        {% else %}
+          <li class="list-group-item text-secondary">No complaints yet</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card p-3">
+      <h5>My Documents</h5>
+      <form method="post" action="{{ url_for('tenant_docs_upload') }}" enctype="multipart/form-data" class="row g-2">
+        <div class="col-md-3">
+          <label class="label">Document Type</label>
+          <select name="doc_type" class="form-select">
+            {% for d in ['aadhaar','pan','other'] %}
+              <option value="{{d}}">{{ d.title() }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="label">Choose File (PDF/JPG/PNG, ≤25MB)</label>
+          <input type="file" name="file" class="form-control" required>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+          <button class="btn btn-primary w-100">Upload</button>
+        </div>
+      </form>
+      <table class="table table-sm mt-3">
+        <thead><tr><th>Type</th><th>File</th><th>When</th><th>Download</th></tr></thead>
+        <tbody>
+          {% for d in docs %}
+            <tr>
+              <td>{{ d.doc_type.title() }}</td>
+              <td>{{ d.filename }}</td>
+              <td>{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('serve_doc', tenant_id=tenant.id, filename=d.filename) }}">Download</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-secondary">No documents yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('payForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const fd = new FormData(this);
+  const resp = await fetch(this.action, {method:'POST', body:fd});
+  const ct = resp.headers.get('content-type')||'';
+  if(ct.includes('application/json')){
+    const data = await resp.json();
+    if(data.order_id){ initRazorpay(data); }
+  }else{
+    location.reload();
+  }
+});
+</script>
+{% endblock %}

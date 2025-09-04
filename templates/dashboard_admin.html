@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">Dashboard</h3>
+<div class="row g-3">
+  <div class="col-md-3"><div class="card p-3"><div class="small small-muted">Total Flats</div><div class="kpi">{{ total_flats }}</div></div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="small small-muted">Occupied</div><div class="kpi">{{ occupied }}</div></div></div>
+  <div class="col-md-3">
+    <a href="{{ url_for('admin_complaints', status='open') }}" class="text-decoration-none">
+      <div class="card p-3">
+        <div class="small small-muted">Open Complaints</div>
+        <div class="kpi">{{ open_complaints }}</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-3"><div class="card p-3"><div class="small small-muted">Paid this month</div><div class="kpi">{{ paid_this_month }}</div></div></div>
+
+  <div class="col-lg-6">
+    <div class="card p-3 chart-card">
+      <h5>Complaints by Category</h5>
+      <canvas id="complaintsChart"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card p-3 chart-card">
+      <h5>Payment Status</h5>
+      <canvas id="paymentsChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+const catLabels = {{ categories|tojson }};
+const catData = {{ comp_counts|tojson }};
+new Chart(document.getElementById('complaintsChart'), {
+  type:'bar',
+  data:{labels:catLabels, datasets:[{label:'Complaints', data:catData}]},
+  options:{responsive:true, plugins:{legend:{display:false}}}
+});
+
+new Chart(document.getElementById('paymentsChart'), {
+  type:'doughnut',
+  data:{labels:['Paid','Pending','Failed'], datasets:[{data:[{{paid}}, {{pending}}, {{failed}}]}]},
+  options:{responsive:true}
+});
+</script>
+{% endblock %}

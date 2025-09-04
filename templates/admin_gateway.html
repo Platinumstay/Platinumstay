@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">Payment Gateway / Bank Details</h3>
+<div class="card p-3">
+  <form method="post" class="row g-3">
+    <div class="col-md-6">
+      <label class="label">Razorpay Key ID</label>
+      <input name="razorpay_key_id" class="form-control" value="{{ gw.razorpay_key_id if gw else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label class="label">Razorpay Key Secret</label>
+      <input name="razorpay_key_secret" class="form-control" value="{{ gw.razorpay_key_secret if gw else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="label">Bank Name</label>
+      <input name="bank_name" class="form-control" value="{{ gw.bank_name if gw else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="label">Account Holder Name</label>
+      <input name="account_name" class="form-control" value="{{ gw.account_name if gw else '' }}">
+    </div>
+    <div class="col-md-4">
+      <label class="label">Account Number</label>
+      <input name="account_number" class="form-control" value="{{ gw.account_number if gw else '' }}">
+    </div>
+    <div class="col-md-3">
+      <label class="label">IFSC</label>
+      <input name="ifsc" class="form-control" value="{{ gw.ifsc if gw else '' }}">
+    </div>
+    <div class="col-md-3">
+      <label class="label">UPI ID</label>
+      <input name="upi_id" class="form-control" value="{{ gw.upi_id if gw else '' }}">
+    </div>
+    <div class="col-12">
+      <button class="btn btn-primary">Save</button>
+    </div>
+  </form>
+  <div class="small small-muted mt-3">
+    For live online payments, each admin must add their own Razorpay keys here. Then assign each tenant to the correct owner in <em>My Tenants</em>.
+  </div>
+</div>
+{% endblock %}

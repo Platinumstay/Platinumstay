@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">Tenant Details</h3>
+<div class="card p-3 mb-3">
+  <div class="row">
+    <div class="col-md-3"><div class="small small-muted">Name</div><div class="h5">{{ tenant.name }}</div></div>
+    <div class="col-md-2"><div class="small small-muted">Flat</div><div class="h5">{{ tenant.flat }}</div></div>
+    <div class="col-md-2"><div class="small small-muted">Code</div><div class="h5">{{ tenant.tenant_code or '-' }}</div></div>
+    <div class="col-md-3"><div class="small small-muted">Email</div><div class="h6">{{ tenant.user.email }}</div></div>
+    <div class="col-md-2"><div class="small small-muted">Rent / mo</div><div class="h5">₹{{ '%.2f'|format(tenant.rent_amount) }}</div></div>
+  </div>
+  <div class="small small-muted">Owner: {{ tenant.owner.email if tenant.owner else '-' }}</div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h5>Documents</h5>
+      <table class="table table-sm">
+        <thead><tr><th>Type</th><th>File</th><th>When</th><th>Download</th></tr></thead>
+        <tbody>
+          {% for d in docs %}
+            <tr>
+              <td>{{ d.doc_type.title() }}</td>
+              <td>{{ d.filename }}</td>
+              <td>{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+              <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('serve_doc', tenant_id=tenant.id, filename=d.filename) }}">Download</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-secondary">No documents</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h5>Complaints</h5>
+      <table class="table table-sm">
+        <thead><tr><th>Status</th><th>Category</th><th>Subject</th><th>Created</th></tr></thead>
+        <tbody>
+          {% for c in complaints %}
+            <tr>
+              <td><span class="badge {% if c.status=='open' %}text-bg-warning{% elif c.status=='closed' %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ c.status|title }}</span></td>
+              <td>{{ c.category.title() }}</td>
+              <td>{{ c.subject }}</td>
+              <td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="text-secondary">No complaints</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col-12">
+    <div class="card p-3">
+      <h5>Payments</h5>
+      <table class="table table-sm">
+        <thead><tr><th>Period</th><th>Status</th><th>Amount</th><th>Paid On</th><th>Gateway</th></tr></thead>
+        <tbody>
+          {% for p in payments %}
+            <tr>
+              <td>{{ p.period or '-' }}</td>
+              <td><span class="badge {% if p.status=='paid' %}text-bg-success{% elif p.status=='pending' %}text-bg-warning{% else %}text-bg-danger{% endif %}">{{ p.status|upper }}</span></td>
+              <td>₹{{ '%.2f'|format(p.amount) }}</td>
+              <td>{{ p.paid_on.strftime('%Y-%m-%d %H:%M') if p.paid_on else '-' }}</td>
+              <td>{{ p.gateway or '-' }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="text-secondary">No payments</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

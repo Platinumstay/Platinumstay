@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">My Tenants</h3>
+<div class="card p-3 mb-3">
+  <form class="row g-2">
+    <div class="col-md-6">
+      <label class="label">Search by Name / Flat / Code</label>
+      <input class="form-control" name="q" value="{{ q }}" placeholder="e.g., John, A-101, T001">
+    </div>
+    {% if is_super %}
+    <div class="col-md-3">
+      <label class="label">Filter by Owner</label>
+      <select name="owner" class="form-select">
+        <option value="">-- All Owners --</option>
+        {% for o in owners %}
+          <option value="{{o.id}}" {% if owner_filter and owner_filter|int == o.id %}selected{% endif %}>{{ o.email }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <div class="col-md-3 d-flex align-items-end justify-content-end">
+      <a class="btn btn-primary" href="{{ url_for('admin_tenant_new') }}">+ Add Tenant</a>
+    </div>
+  </form>
+</div>
+
+<div class="card p-3">
+  <table class="table table-sm">
+    <thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Flat</th><th>Rent</th>
+      <th>Email</th>{% if is_super %}<th>Owner</th>{% endif %}<th>Active</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for t in tenants %}
+        <tr>
+          <td>{{ t.id }}</td>
+          <td>{{ t.tenant_code or '-' }}</td>
+          <td>{{ t.name }}</td>
+          <td>{{ t.flat }}</td>
+          <td>₹{{ '%.2f'|format(t.rent_amount) }}</td>
+          <td>{{ t.user.email }}</td>
+          {% if is_super %}<td>{{ t.owner.email if t.owner else '-' }}</td>{% endif %}
+          <td><span class="badge {{ 'text-bg-success' if t.active else 'text-bg-secondary' }}">{{ 'Yes' if t.active else 'No' }}</span></td>
+          <td class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin_tenant_detail', tenant_id=t.id) }}">View</a>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin_tenant_edit', tenant_id=t.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('admin_tenant_delete', tenant_id=t.id) }}" onsubmit="return confirm('Delete tenant and related data?')">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9" class="text-secondary">No tenants found</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

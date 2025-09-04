@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3 class="mb-3">Complaints</h3>
+<div class="card p-3 mb-3">
+  <form class="row g-2">
+    <div class="col-md-4">
+      <label class="label">Filter by status</label>
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="">-- All --</option>
+        {% for s in ['open','in_progress','closed'] %}
+          <option value="{{s}}" {% if status==s %}selected{% endif %}>{{ s.replace('_',' ').title() }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="card p-3">
+  <table class="table table-sm">
+    <thead><tr><th>Flat</th><th>Category</th><th>Subject</th><th>Description</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in complaints %}
+        <tr>
+          <td>{{ c.tenant.flat if c.tenant else '-' }}</td>
+          <td>{{ c.category.title() }}</td>
+          <td>{{ c.subject }}</td>
+          <td>{{ c.detail }}</td>
+          <td><span class="badge {% if c.status=='open' %}text-bg-warning{% elif c.status=='closed' %}text-bg-success{% else %}text-bg-secondary{% endif %}">{{ c.status.replace('_',' ').title() }}</span></td>
+          <td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td class="d-flex gap-2">
+            <form method="post" action="{{ url_for('admin_complaint_status', cid=c.id) }}">
+              <input type="hidden" name="status" value="in_progress">
+              <button class="btn btn-sm btn-outline-secondary">Resolve</button>
+            </form>
+            <form method="post" action="{{ url_for('admin_complaint_status', cid=c.id) }}">
+              <input type="hidden" name="status" value="closed">
+              <button class="btn btn-sm btn-success">Close</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="text-secondary">No complaints</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
