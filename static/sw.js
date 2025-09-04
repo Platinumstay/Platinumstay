@@ -1,5 +1,5 @@
 
-const CACHE = "platinumstay-v1";
+const CACHE = "platinumstay-v8";
 const ASSETS = [
   "/", "/login",
   "/static/css/site.css",
